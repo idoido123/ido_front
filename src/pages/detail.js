@@ -417,6 +417,7 @@ function DetailPage(){
 
     return time;
   }
+
   return(
     <Container maxW='4xl'>
       <chakra.div  h="4.5rem" display={'flex'}  alignItems="center">
@@ -451,7 +452,7 @@ function DetailPage(){
       <chakra.div fontStyle={'italic'} fontSize={"xl"}>
         Project Config
       </chakra.div>
-      <Grid mt={3} templateColumns='repeat(3, 1fr)' gap={6}>
+      <Grid mt={3} templateColumns={isMobile?{base:"repeat(1, 1fr)"}:{ base: "repeat(3, 1fr)" }} gap={6}>
         <chakra.div h={"100px"}   _hover={{  bg:"blue.200",boxShadow: "none",textDecoration:"none",border:'none' }}
                     display={'flex'} flexDirection={'column'} alignContent={'center'}  borderRadius={"0.5rem"} bg={"blue.300"}  opacity={"0.8"} as={GridItem}>
           <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Total Supply</chakra.span>
@@ -470,7 +471,7 @@ function DetailPage(){
         </chakra.div>
       </Grid>
 
-      <Grid mt={3} templateColumns='repeat(3, 1fr)' gap={6}>
+      <Grid mt={3} templateColumns={isMobile?{base:"repeat(1, 1fr)"}:{ base: "repeat(3, 1fr)" }} gap={6}>
         <chakra.div h={"100px"}  _hover={{  bg:"blue.200",boxShadow: "none",textDecoration:"none",border:'none' }}
                     display={'flex'} flexDirection={'column'} alignContent={'center'}  borderRadius={"0.5rem"} bg={"blue.300"}  opacity={"0.8"} as={GridItem}>
           <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Initial Release</chakra.span>
@@ -496,7 +497,7 @@ function DetailPage(){
         <chakra.div mt={2} fontStyle={'italic'} fontSize={"xl"}>
           Harvest Information
         </chakra.div>
-        <Grid mt={3} templateColumns='repeat(3, 1fr)' gap={6}>
+          <Grid mt={3} templateColumns={isMobile?{base:"repeat(1, 1fr)"}:{ base: "repeat(3, 1fr)" }} gap={6}>
           <chakra.div h={"100px"}  _hover={{  bg:"blue.200",boxShadow: "none",textDecoration:"none",border:'none' }}
                       display={'flex'} flexDirection={'column'} alignContent={'center'}  borderRadius={"0.5rem"} bg={"blue.300"}  opacity={"0.8"} as={GridItem}>
             <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Remaining Amount </chakra.span>
@@ -518,7 +519,7 @@ function DetailPage(){
         </chakra.div>:""}
 
 
-      <Grid mt={3} templateColumns='repeat(2, 1fr)' gap={6}>
+      <Grid mt={3} templateColumns={isMobile?{base:"repeat(1, 1fr)"}:{ base: "repeat(2, 1fr)" }} gap={6}>
         <chakra.div  as={GridItem} display={'flex'} flexDirection={'column'}>
           <chakra.div mb={3} h={"40px"}  display={'flex'} flexDirection={'row'}>
             <IconButton  _hover={{bg:"gray.400"}} {...dec} _focus={{ boxShadow: "none",textDecoration:"none",border:'none' }} bg={""}
