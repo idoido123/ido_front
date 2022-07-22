@@ -269,11 +269,46 @@ function DetailPage(){
   const inc = getIncrementButtonProps()
   const dec = getDecrementButtonProps()
   const [isClaimLoading,setIsClaimLoading] = useState(false)
+  const [isHarvestLoading,setIsHarvestLoading] = useState(false)
   const harvest = async ()=>{
+    console.log(contractObj,walletAddress,web3)
     if (contractObj && walletAddress && web3) {
-
+      setIsHarvestLoading(true)
+      try{
+        const result = await contractObj.methods.harvest(0).send({ from: walletAddress, value: 0, gas: 3000000 })
+        setIsHarvestLoading(false)
+      }catch (e) {
+        setIsHarvestLoading(false)
+      }
+      setIsHarvestLoading(false)
+      setIsRefresh(true)
     }
   }
+  const [isRefresh,setIsRefresh] = useState(false)
+  useEffect(() => {
+    if (isRefresh) {
+      if (!walletAddress || !contractObj  || !web3) {
+        return
+      }
+      (async ()=> {
+        let claimedResult = await contractObj.methods.claimed(0,walletAddress).call({from:walletAddress})
+        setclaimedAmount(claimedResult)
+
+        let balanceOfResult = await tokenContractObj.methods.balanceOf(walletAddress).call({from:walletAddress})
+        setBalanceOf(balanceOfResult)
+
+        const result = await contractObj.methods.harvested(0,walletAddress).call({from:walletAddress})
+        let info ={
+          lastClaimedTime:result.lastClaimedTime,
+          receiveTimes:result.receiveTimes,
+          remainingAmount:result.remainingAmount,
+          token:result.token,
+        }
+        setHarvestInfo(info)
+      })()
+      setIsRefresh(false)
+    }
+  },[isRefresh])
   const doClaim = async () => {
     if (contractObj && walletAddress && web3) {
       let inputBNB = parseFloat(input.value);
@@ -307,9 +342,14 @@ function DetailPage(){
       let proof = gtree.getProof(leaf).map(x => buf2hex(x.data));
       console.log(proof)
       setIsClaimLoading(true)
-      const result = await contractObj.methods.claim(walletAddress, 0,proof).send({ from: walletAddress, value: price, gas: 3000000 })
-      console.log(result)
+      try{
+        await contractObj.methods.claim(walletAddress, 0,proof).send({ from: walletAddress, value: price, gas: 3000000 })
+      }catch (e) {
+        setIsClaimLoading(false)
+      }
       setIsClaimLoading(false)
+      setIsRefresh(true)
+
       // const mintNum = await contractObj.methods.getNumMinted(walletAddress).call({from:walletAddress})
       // setMintAllowanceNum(3-mintNum)
     }
@@ -331,9 +371,10 @@ function DetailPage(){
   const [isClaim,setIsClaim] = useState(true)
   useEffect(()=>{
     if (harvestInfo) {
-      if (harvestInfo.lastClaimedTime === 0){
+      if (harvestInfo.lastClaimedTime == 0){
         setIsHarvest(false)
-      }else if (Math.floor(new Date().getTime() / 1000) - claimInfo.lastClaimedTime >= 86400) {
+      }
+      if (Math.floor(new Date().getTime() / 1000) - claimInfo.lastClaimedTime >= 86400) {
         setIsHarvest(false)
       }
     }
@@ -345,6 +386,25 @@ function DetailPage(){
 
 
   },[harvestInfo,claimInfo])
+  console.log("isHarvest",isHarvest)
+  function timeConverter(UNIX_timestamp){
+    if (UNIX_timestamp == 0) {
+      return 0
+    }
+    let a = new Date(UNIX_timestamp * 1000);
+    //let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let year = a.getFullYear();
+    //let month = months[a.getMonth()];
+    let month = a.getMonth()+1;
+    let date = a.getDate();
+    let hour = a.getHours();
+    let min = a.getMinutes();
+    let sec = a.getSeconds();
+    //let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    let time = year + '.'+month +"." +date+"  " + hour + ':' + min + ':' + sec ;
+
+    return time;
+  }
   return(
     <Container maxW='4xl'>
       <chakra.div  h="4.5rem" display={'flex'}  alignItems="center">
@@ -436,14 +496,14 @@ function DetailPage(){
 
         <chakra.div h={"100px"}  _hover={{  bg:"blue.200",boxShadow: "none",textDecoration:"none",border:'none' }}
         display={'flex'} flexDirection={'column'} alignContent={'center'}  borderRadius={"0.5rem"} bg={"blue.300"}  opacity={"0.8"} as={GridItem}>
-        <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Last Harvested Time</chakra.span>
+        <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Harvest times</chakra.span>
         <chakra.span h={"80%"} fontSize={"2xl"} m={3} fontWeight={'bold'} color={'black'}>{harvestInfo?harvestInfo.receiveTimes:"Loading..."}</chakra.span>
         </chakra.div>
 
         <chakra.div h={"100px"}  _hover={{  bg:"blue.200",boxShadow: "none",textDecoration:"none",border:'none' }}
         display={'flex'} flexDirection={'column'} alignContent={'center'}  borderRadius={"0.5rem"} bg={"blue.300"}  opacity={"0.8"} as={GridItem}>
           <chakra.span m={3} h={"20%"} fontSize={"2xl"} fontWeight={"bold"} color={"blue.600"}>Next harvest time </chakra.span>
-          <chakra.span h={"80%"} fontSize={"2xl"} m={3} fontWeight={'bold'} color={'black'}>{harvestInfo?harvestInfo.lastClaimedTime:"Loading..."}</chakra.span>
+          <chakra.span h={"80%"} fontSize={"2xl"} m={3} fontWeight={'bold'} color={'black'}>{harvestInfo?timeConverter(harvestInfo.lastClaimedTime):"Loading..."}</chakra.span>
         </chakra.div>
         </Grid>
         </chakra.div>:""}
@@ -463,16 +523,17 @@ function DetailPage(){
           </chakra.div>
           <Button colorScheme='blue' onClick={doClaim}
                   isLoading={isClaimLoading}
-                  disabled={
-                    (claimInfo && isWhitelist==false && Math.floor(new Date().getTime() / 1000) < claimInfo.publicSaleTime)||isClaimLoading?true:false}>
+                  disabled={isClaim || isClaimLoading}>
             Claim {input.value} BNB</Button>
         </chakra.div>
 
         <chakra.div as={GridItem} display={'flex'} flexDirection={'column'}>
           <chakra.div mb={3} alignItems={'center'} h={"40px"} fontWeight={"bold"} fontSize={'xl'} display={'flex'} flexDirection={'row'}>
-            Currently Harvestable Token:{claimInfo && harvestInfo ? Math.floor(harvestInfo.remainingAmount/(7-harvestInfo.receiveTimes)/(10**claimInfo.decimals)):"0"}
+            Harvestable Token:
+            <chakra.span fontWeight={"400"}> {claimInfo && harvestInfo ? harvestInfo.remainingAmount/(7-harvestInfo.receiveTimes)/(10**claimInfo.decimals):"0"}</chakra.span>
+
           </chakra.div>
-          <Button colorScheme='blue' disabled={isHarvest} onClick={harvest}>Harvest</Button>
+          <Button colorScheme='blue' isLoading={isHarvestLoading} disabled={isHarvest || isHarvestLoading} onClick={harvest}>Harvest</Button>
         </chakra.div>
       </Grid>
 
