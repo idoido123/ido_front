@@ -63,6 +63,18 @@ function DetailPage(){
 
 
       const { ethereum } = window;
+      const metamaskIsInstalled = ethereum && ethereum.isMetaMask;
+      if (!metamaskIsInstalled){
+        toast({
+          title: 'MetaMask is not installed.',
+          description: "Please install MetaMask first.",
+          status: 'warning',
+          position:"top-right",
+          duration: 3000,
+          isClosable: true,
+        })
+        return
+      }
       try {
         await ethereum.request({
           method: 'wallet_switchEthereumChain',
@@ -428,9 +440,6 @@ function DetailPage(){
 
       <chakra.div mt={3} display={'flex'} justifyContent={'center'} flexDirection={'column'}>
         <Heading as='h4' size='md' textAlign={'center'}>Doge king</Heading>
-        <chakra.div mt={1} fontStyle={'italic'} fontWeight={'500'} textAlign={'center'}>
-          Public Sale
-        </chakra.div>
         <chakra.div mt={2} mb={2} fontStyle={'italic'} fontSize={"md"} fontWeight={"400"}>
           Featured: Hide transactions involving tokens flagged as having poor reputation with
           Featured: Hide transactions involving tokens flagged as having poor reputation with
