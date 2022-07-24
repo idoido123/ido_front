@@ -98,14 +98,14 @@ function DetailPage(){
       setWeb3(web3)
       const SmartContractObj = new Web3EthContract(
         abi,
-        "0x67cFFAd0115011417ea5c750fc492771af16DB96"
+        "0x67cFFAd0115011417ea5c750fc492771af16DB96" //IDO 合约的合约地址
       );
       setContractObj(SmartContractObj)
 
 
       const tokenContractObj = new Web3EthContract(
         tokenAbi,
-        "0x0D7AEF268D09910F22a9e5E284B897c833CD6f0B"
+        "0x0D7AEF268D09910F22a9e5E284B897c833CD6f0B" // token的合约地址
       );
       setTokenContractObj(tokenContractObj)
 
@@ -117,6 +117,7 @@ function DetailPage(){
     if (!contractObj  || !web3) {
       return
     }
+    // 0 可以替换为智能合约里面项目的id
     //读取config
     (async ()=> {
       const result = await contractObj.methods.claimInfos(0).call({from:walletAddress})
@@ -145,6 +146,7 @@ function DetailPage(){
       return
     }
     //读取收获配置
+    //  0 可以替换为智能合约里面项目的id
     (async ()=> {
       const result = await contractObj.methods.harvested(0,walletAddress).call({from:walletAddress})
       let info ={
@@ -162,6 +164,7 @@ function DetailPage(){
     if (!walletAddress || !contractObj  || !web3) {
       return
     }
+    // // 0 可以替换为智能合约里面项目的id
     (async ()=> {
       const result = await contractObj.methods.claimed(0,walletAddress).call({from:walletAddress})
       setclaimedAmount(result)
@@ -225,6 +228,7 @@ function DetailPage(){
       await ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{
+          // bnb 56
           chainId: Web3.utils.numberToHex(4) // 目标链ID
         }]
       })
@@ -244,6 +248,7 @@ function DetailPage(){
       method: "net_version",
     });
 
+    // bnb 56
     if (networkId == 4) {
       await ethereum.request({
         method: "eth_requestAccounts",
@@ -287,6 +292,7 @@ function DetailPage(){
     if (contractObj && walletAddress && web3) {
       setIsHarvestLoading(true)
       try{
+        // 0替换为智能合约内的项目id
         const result = await contractObj.methods.harvest(0).send({ from: walletAddress, value: 0, gas: 3000000 })
         setIsHarvestLoading(false)
       }catch (e) {
@@ -303,12 +309,14 @@ function DetailPage(){
         return
       }
       (async ()=> {
+        // 0替换为智能合约内的项目id
         let claimedResult = await contractObj.methods.claimed(0,walletAddress).call({from:walletAddress})
         setclaimedAmount(claimedResult)
 
         let balanceOfResult = await tokenContractObj.methods.balanceOf(walletAddress).call({from:walletAddress})
         setBalanceOf(balanceOfResult)
 
+        // 0替换为智能合约内的项目id
         const result = await contractObj.methods.harvested(0,walletAddress).call({from:walletAddress})
         let info ={
           lastClaimedTime:result.lastClaimedTime,
@@ -355,6 +363,7 @@ function DetailPage(){
       console.log(proof)
       setIsClaimLoading(true)
       try{
+        // 0替换为智能合约内的项目id
         await contractObj.methods.claim(walletAddress, 0,proof).send({ from: walletAddress, value: price, gas: 3000000 })
       }catch (e) {
         setIsClaimLoading(false)
