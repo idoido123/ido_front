@@ -395,7 +395,7 @@ function DetailPage(){
       if (harvestInfo.lastClaimedTime == 0){
         setIsHarvest(false)
       }
-      if (Math.floor(new Date().getTime() / 1000) - claimInfo.lastClaimedTime >= 86400) {
+      if (Math.floor(new Date().getTime() / 1000) - harvestInfo.lastClaimedTime >= 86400) {
         setIsHarvest(false)
       }
     }
@@ -407,7 +407,7 @@ function DetailPage(){
 
 
   },[harvestInfo,claimInfo])
-  console.log("isHarvest",isHarvest)
+  console.log("isHarvest",isHarvest,isClaim,Math.floor(new Date().getTime() / 1000),claimInfo.lastClaimedTime)
   function timeConverter(UNIX_timestamp){
     if (UNIX_timestamp == 0) {
       return 0
